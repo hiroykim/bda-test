@@ -1,8 +1,16 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+k_fold = KFold(n_splits=10, shuffle=True, random_state=0)
 
 
 def print_data(cnt):
@@ -59,9 +67,9 @@ def pre_processing():
 def make_model():
     global X_train, y_train
 
-    X_train = X_train.to_numpy()
+    #X_train = X_train.to_numpy()
     y_train = y_train.gender
-    y_train = y_train.to_numpy()
+    #y_train = y_train.to_numpy()
 
     X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
 
@@ -93,11 +101,11 @@ if __name__=="__main__":
     init()
     X_train, y_train = read_files()
     X_total = X_train.shape[0]
-    print_data(1)
+    #print_data(1)
     X_train = add_columns()
-    print_data(2)
+    #print_data(2)
     pre_processing()
-    print_data(3)
+    #print_data(3)
     make_model()
     '''
     print_data(4)
