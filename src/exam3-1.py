@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.model_selection import cross_val_score
 k_fold = KFold(n_splits=10, shuffle=True, random_state=0)
 
