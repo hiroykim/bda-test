@@ -57,7 +57,7 @@ def pre_processing():
     X_train = pd.merge(X_train, df_tmp, on='cust_id')
 
     #2. drop columns
-    X_train = X_train.drop(['환불금액', '주구매상품', '주구매지점'], axis=1)
+    X_train = X_train.drop(['cust_id','환불금액', '주구매상품', '주구매지점', 'gender'], axis=1)
 
     # 2. Scaler
     mms = MinMaxScaler()
