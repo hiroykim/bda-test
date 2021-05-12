@@ -11,4 +11,4 @@ if __name__=="__main__":
     sample_1()
     sample_1(a=1, b=2)
     sample_1(1, 2, 10, 100)
-    sample_1(a=1, b=2, c=10, d=4000)
+    sample_1(a=1, b=2, c=10, d=5000)
