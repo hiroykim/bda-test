@@ -44,7 +44,7 @@ print(y_train.shape)
 
 from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV
 
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.3, random_state=123)
 
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
