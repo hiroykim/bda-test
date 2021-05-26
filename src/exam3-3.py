@@ -37,19 +37,26 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 sc= StandardScaler()
 X_train= sc.fit_transform(X_train)
 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-print(X_train)
+print(X_train.shape)
 
 y_train= y_train['gender']
-print(y_train)
-
-from sklearn.svm import SVC
-
-model= SVC()
-model.fit(X_train, y_train)
+print(y_train.shape)
 
 from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV
 
-mscore= model.score(X_train, y_train)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
+
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from xgboost import XGBClassifier
+
+model= XGBClassifier()
+model.fit(X_train, y_train)
+
+mscore= model.score(X_val, y_val)
 k_f= KFold(n_splits=5, shuffle=True, random_state=123)
 scores= cross_val_score(model, X_train, y_train, cv=k_f)
 print(mscore)
@@ -57,6 +64,6 @@ print(scores)
 
 from sklearn.metrics import roc_auc_score
 
-predict = model.predict(X_train)
-rascore = roc_auc_score(y_train, predict)
+predict = model.predict(X_val)
+rascore = roc_auc_score(y_val, predict)
 print(rascore)
