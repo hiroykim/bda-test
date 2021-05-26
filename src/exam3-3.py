@@ -31,3 +31,32 @@ print(X_train['내점일수'])
 print(X_train['내점일수'].map(lambda x : x*2))
 print(X_train[['내점일수','구매주기']].apply(lambda x : x*4))
 '''
+
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+sc= StandardScaler()
+X_train= sc.fit_transform(X_train)
+print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+print(X_train)
+
+y_train= y_train['gender']
+print(y_train)
+
+from sklearn.svm import SVC
+
+model= SVC()
+model.fit(X_train, y_train)
+
+from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV
+
+mscore= model.score(X_train, y_train)
+k_f= KFold(n_splits=5, shuffle=True, random_state=123)
+scores= cross_val_score(model, X_train, y_train, cv=k_f)
+print(mscore)
+print(scores)
+
+from sklearn.metrics import roc_auc_score
+
+predict = model.predict(X_train)
+rascore = roc_auc_score(y_train, predict)
+print(rascore)
