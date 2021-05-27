@@ -44,6 +44,28 @@ def test():
     X_test['환불금액'] = X_test['환불금액'].fillna(0)
     print(X_train)
 
+def preprocessing_all_2(X_all, X_test):
+    X_all['환불금액']= X_all['환불금액'].fillna(0)
+    X_test['환불금액'] = X_test['환불금액'].fillna(0)
+
+    df_dum_pd= pd.get_dummies(X_all['주구매상품'])
+    df_dum_loc= pd.get_dummies(X_all['주구매지점'])
+    X_all= pd.concat([X_all, df_dum_pd, df_dum_loc], axis=1)
+    X_all= X_all.drop(['cust_id','주구매상품','주구매지점'], axis=1)
+
+    df_dum_pd2= pd.get_dummies(X_test['주구매상품'])
+    df_dum_loc2= pd.get_dummies(X_test['주구매지점'])
+    X_test= pd.concat([X_test, df_dum_pd2, df_dum_loc2], axis=1)
+    X_test= X_test.drop(['cust_id','주구매상품','주구매지점'], axis=1)
+
+    sc= StandardScaler()
+    sc.fit(X_all)
+    X_all= sc.transform(X_all)
+    sc.fit(X_test)
+    X_test= sc.transform(X_test)
+
+    return X_all, X_test
+
 
 def preprocessing_all(X_all):
     X_all['환불금액']= X_all['환불금액'].fillna(0)
@@ -97,10 +119,14 @@ if __name__ == "__main__":
 
     #test_model(LogisticRegression())
 
-    X_train= preprocessing_all(X_train)
-    X_test = preprocessing_all(X_test)
+    if 1:
+        X_train= preprocessing_all(X_train)
+        X_test = preprocessing_all(X_test)
+    else:
+        X_train, X_test = preprocessing_all_2(X_train, X_test)
+
     y_train= y_train.loc[:, 'gender']
-    k_f = KFold(n_splits=10, shuffle=True, random_state=123)
+    k_f = KFold(n_splits=5, shuffle=True, random_state=123)
 
     '''
     make_model(LogisticRegression())
@@ -114,16 +140,17 @@ if __name__ == "__main__":
     tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
                          'C': [1, 10, 100, 1000]},
                         {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
-    '''
+    
     tuned_parameters= [{'C': [1.2, 1.1, 1.0, 0.9, 0.8]}]
 
     gscv = GridSearchCV(estimator=SVC(), param_grid=tuned_parameters, n_jobs=multiprocessing.cpu_count(), cv=k_f)
     gscv.fit(X_train, y_train)
     print(gscv.best_params_)
     print(gscv.best_estimator_)
+    '''
 
     make_model(SVC())
-    make_model(SVC(C=0.8))
-    make_model(SVC(C=0.8, kernel='linear'))
+    #make_model(SVC(C=0.8))
+    #make_model(SVC(C=0.8, kernel='linear'))
 
 
