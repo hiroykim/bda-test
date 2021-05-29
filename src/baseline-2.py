@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import numpy as np
 import multiprocessing
@@ -28,12 +29,19 @@ y_cust=  X_test['cust_id']
 
 print(X_train['주구매상품'].value_counts())
 print(X_train.groupby('gender')['주구매상품'].value_counts())
+print(X_all['주구매상품'])
 
-pd_tmp= pd.get_dummies(X_all["주구매상품"])
-ag_tmp= pd.get_dummies(X_all["주구매지점"])
-X_all= pd.concat([X_all, pd_tmp, ag_tmp], axis=1)
+if 0:
+    pd_tmp= pd.get_dummies(X_all["주구매상품"])
+    ag_tmp= pd.get_dummies(X_all["주구매지점"])
+    X_all = pd.concat([X_all, pd_tmp, ag_tmp], axis=1)
+
+X_all["주구매상품"]=LabelEncoder().fit_transform(X_all["주구매상품"])
+X_all["주구매지점"]=LabelEncoder().fit_transform(X_all["주구매지점"])
+#sys.exit(0)
+
 X_all["환불금액"]= X_all["환불금액"].fillna(0)
-X_all= X_all.drop(['cust_id',"주구매상품","주구매지점","gender"], axis=1)
+X_all= X_all.drop(['cust_id',"gender"], axis=1)
 
 print(X_all)
 sc= StandardScaler()
