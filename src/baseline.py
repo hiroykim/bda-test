@@ -9,7 +9,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 from xgboost import XGBClassifier
+
 
 pd.set_option("display.max_rows", 10)
 pd.set_option("display.max_columns", 999)
@@ -93,6 +95,16 @@ rst= kn_model.predict(X_val)
 ras= roc_auc_score(y_val, rst)
 print("roc_auc_score : ", ras)
 sd['kn_model']=(cvs.mean(), ras)
+
+gn_model= GaussianNB()
+gn_model.fit(X_train, y_train)
+cvs= cross_val_score(gn_model, X_train, y_train, scoring='accuracy', verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
+print("cross_val:", cvs)
+print("cross_val:", cvs.mean())
+rst= gn_model.predict(X_val)
+ras= roc_auc_score(y_val, rst)
+print("roc_auc_score : ", ras)
+sd['gn_model']=(cvs.mean(), ras)
 
 xgb_model= XGBClassifier()
 xgb_model.fit(X_train, y_train)
