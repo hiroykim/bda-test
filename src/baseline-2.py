@@ -51,7 +51,7 @@ print(X_all.shape)
 X_train= X_all[:X_train_size]
 X_test= X_all[X_train_size:]
 
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=11)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.1, random_state=11)
 print("=================================================")
 
 sd=dict()
