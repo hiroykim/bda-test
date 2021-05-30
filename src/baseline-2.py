@@ -53,12 +53,19 @@ X_test= X_all[X_train_size:]
 
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=11)
 print("=================================================")
-print(X_train.shape)
 
 sd=dict()
 
-def get_eval(sd, k_name, label, pred):
+def predict_model(model, X_train, y_train,X_val):
+    model.fit(X_train, y_train)
+    cvs= cross_val_score(model, X_train, y_train, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy')
+    rst= model.predict(X_val)
+    return model, cvs, rst
+
+
+def get_eval(sd, k_name, label, pred, cvs_mean):
     new_dict = dict()
+    new_dict['cvs_mean'] = "{0:.4f}".format(cvs_mean)
     new_dict['acurracy'] = "{0:.4f}".format(accuracy_score(label, pred))
     new_dict['precision'] = "{0:.4f}".format(precision_score(label, pred))
     new_dict['recall'] = "{0:.4f}".format(recall_score(label, pred))
@@ -66,63 +73,27 @@ def get_eval(sd, k_name, label, pred):
     new_dict['roc_auc_score'] = "{0:.4f}".format(roc_auc_score(label, pred))
     sd[k_name]= new_dict
 
-if 0:
-    svc_model= SVC(probability=True)
-    svc_model.fit(X_train, y_train)
-    cvs= cross_val_score(svc_model, X_train, y_train, scoring='accuracy' , verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-    print("cross_val:", cvs)
-    print("cross_val:", cvs.mean())
-    rst= svc_model.predict(X_val)
-    get_eval(sd, 'svc_model', y_val, rst)
 
-lg_model= LogisticRegression()
-lg_model.fit(X_train, y_train)
-cvs= cross_val_score(lg_model, X_train, y_train, scoring='accuracy' , verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-print("cross_val:", cvs)
-print("cross_val:", cvs.mean())
-rst= lg_model.predict(X_val)
-get_eval(sd, 'lg_model', y_val, rst)
+svc_model, cvs, rst= predict_model(SVC(probability=True), X_train, y_train, X_val)
+get_eval(sd, 'svc_model', y_val, rst, cvs.mean())
 
-dt_model= DecisionTreeClassifier()
-dt_model.fit(X_train, y_train)
-cvs= cross_val_score(dt_model, X_train, y_train, scoring='accuracy' , verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-print("cross_val:", cvs)
-print("cross_val:", cvs.mean())
-rst= dt_model.predict(X_val)
-get_eval(sd, 'dt_model', y_val, rst)
+lg_model, cvs, rst= predict_model(LogisticRegression(), X_train, y_train, X_val)
+get_eval(sd, 'lg_model', y_val, rst, cvs.mean())
 
+dt_model, cvs, rst= predict_model(DecisionTreeClassifier(), X_train, y_train, X_val)
+get_eval(sd, 'dt_model', y_val, rst, cvs.mean())
 
-rf_model= RandomForestClassifier()
-rf_model.fit(X_train, y_train)
-cvs= cross_val_score(rf_model, X_train, y_train, scoring='accuracy' , verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-print("cross_val:", cvs)
-print("cross_val:", cvs.mean())
-rst= rf_model.predict(X_val)
-get_eval(sd, 'rf_model', y_val, rst)
+rf_model, cvs, rst= predict_model(RandomForestClassifier(), X_train, y_train, X_val)
+get_eval(sd, 'rf_model', y_val, rst, cvs.mean())
 
-kn_model= KNeighborsClassifier()
-kn_model.fit(X_train, y_train)
-cvs= cross_val_score(kn_model, X_train, y_train, scoring='accuracy' , verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-print("cross_val:", cvs)
-print("cross_val:", cvs.mean())
-rst= kn_model.predict(X_val)
-get_eval(sd, 'kn_model', y_val, rst)
+kn_model, cvs, rst= predict_model(KNeighborsClassifier(), X_train, y_train, X_val)
+get_eval(sd, 'kn_model', y_val, rst, cvs.mean())
 
-gn_model= GaussianNB()
-gn_model.fit(X_train, y_train)
-cvs= cross_val_score(gn_model, X_train, y_train, scoring='accuracy', verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-print("cross_val:", cvs)
-print("cross_val:", cvs.mean())
-rst= gn_model.predict(X_val)
-get_eval(sd, 'gn_model', y_val, rst)
+gn_model, cvs, rst= predict_model(GaussianNB(), X_train, y_train, X_val)
+get_eval(sd, 'gn_model', y_val, rst, cvs.mean())
 
-xgb_model= XGBClassifier()
-xgb_model.fit(X_train, y_train)
-cvs= cross_val_score(xgb_model, X_train, y_train, scoring='accuracy', verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
-print("cross_val:", cvs)
-print("cross_val:", cvs.mean())
-rst= xgb_model.predict(X_val)
-get_eval(sd, 'xgb_model', y_val, rst)
+xgb_model, cvs, rst= predict_model(XGBClassifier(), X_train, y_train, X_val)
+get_eval(sd, 'xgb_model', y_val, rst, cvs.mean())
 
 for k,v in sd.items():
     print("{0}->{1}".format(k, v))
