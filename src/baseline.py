@@ -49,15 +49,22 @@ print(X_train.shape)
 
 sd=dict()
 
+def get_eval(sd, k_name, label, pred):
+    new_dict = dict()
+    new_dict['acurracy'] = "{0:.4f}".format(accuracy_score(label, pred))
+    new_dict['precision'] = "{0:.4f}".format(precision_score(label, pred))
+    new_dict['recall'] = "{0:.4f}".format(recall_score(label, pred))
+    new_dict['f1'] = "{0:.4f}".format(f1_score(label, pred))
+    new_dict['roc_auc_score'] = "{0:.4f}".format(roc_auc_score(label, pred))
+    sd[k_name]= new_dict
+
 svc_model= SVC(probability=True)
 svc_model.fit(X_train, y_train)
 cvs= cross_val_score(svc_model, X_train, y_train, scoring='accuracy' , verbose=True, cv=5, n_jobs=multiprocessing.cpu_count())
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= svc_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['svc_model']=(cvs.mean(), ras)
+get_eval(sd, 'svc_model', y_val, rst)
 
 lg_model= LogisticRegression()
 lg_model.fit(X_train, y_train)
@@ -65,9 +72,7 @@ cvs= cross_val_score(lg_model, X_train, y_train, scoring='accuracy' , verbose=Tr
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= lg_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['lg_model']=(cvs.mean(), ras)
+get_eval(sd, 'lg_model', y_val, rst)
 
 dt_model= DecisionTreeClassifier()
 dt_model.fit(X_train, y_train)
@@ -75,9 +80,8 @@ cvs= cross_val_score(dt_model, X_train, y_train, scoring='accuracy' , verbose=Tr
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= dt_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['dt_model']=(cvs.mean(), ras)
+get_eval(sd, 'dt_model', y_val, rst)
+
 
 rf_model= RandomForestClassifier()
 rf_model.fit(X_train, y_train)
@@ -85,9 +89,7 @@ cvs= cross_val_score(rf_model, X_train, y_train, scoring='accuracy' , verbose=Tr
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= rf_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['rf_model']=(cvs.mean(), ras)
+get_eval(sd, 'rf_model', y_val, rst)
 
 kn_model= KNeighborsClassifier()
 kn_model.fit(X_train, y_train)
@@ -95,9 +97,7 @@ cvs= cross_val_score(kn_model, X_train, y_train, scoring='accuracy' , verbose=Tr
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= kn_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['kn_model']=(cvs.mean(), ras)
+get_eval(sd, 'kn_model', y_val, rst)
 
 gn_model= GaussianNB()
 gn_model.fit(X_train, y_train)
@@ -105,9 +105,7 @@ cvs= cross_val_score(gn_model, X_train, y_train, scoring='accuracy', verbose=Tru
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= gn_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['gn_model']=(cvs.mean(), ras)
+get_eval(sd, 'gn_model', y_val, rst)
 
 xgb_model= XGBClassifier()
 xgb_model.fit(X_train, y_train)
@@ -115,9 +113,7 @@ cvs= cross_val_score(xgb_model, X_train, y_train, scoring='accuracy', verbose=Tr
 print("cross_val:", cvs)
 print("cross_val:", cvs.mean())
 rst= xgb_model.predict(X_val)
-ras= roc_auc_score(y_val, rst)
-print("roc_auc_score : ", ras)
-sd['xgb_model']=(cvs.mean(), ras)
+get_eval(sd, 'xgb_model', y_val, rst)
 
 for k,v in sd.items():
     print("{0}->{1}".format(k, v))
