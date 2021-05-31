@@ -93,7 +93,7 @@ model= make_model(RandomForestClassifier(random_state=123), X_train, y_train, X_
 model= make_model(GaussianNB(), X_train, y_train, X_val, y_val, "gnb", model_score)
 model= make_model(LogisticRegression(random_state=123), X_train, y_train, X_val, y_val, "lgr", model_score)
 model= make_model(KNeighborsClassifier(), X_train, y_train, X_val, y_val, "knf", model_score)
-model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
+#model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
 
 for k, v in model_score.items():
     print("{0} -> {1}".format(k, v))

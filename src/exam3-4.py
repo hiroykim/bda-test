@@ -11,6 +11,37 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
 
+
+def print_all():
+    print("X_len: ", X_len)
+    print(X_all.info())
+    print(X_all.describe())
+    print(X_all.head())
+
+
+def preprocessing():
+    global X_all
+    X_all= X_all['환불금액'].fillna(0)
+    X_all['주구매상품','주구매지점']= X_all['주구매상품','주구매지점'].apply(LabelEncoder.fit_transform())
+
+def main():
+
+    preprocessing()
+
+
+if __name__ == "__main__":
+    pd.set_option("display.max_rows", 10)
+    pd.set_option("display.max_columns", 999)
+
+    X_train = pd.read_csv("data/X_train.csv", encoding="cp949")
+    y_train = pd.read_csv("data/y_train.csv", encoding="cp949")
+    X_test = pd.read_csv("data/X_test.csv", encoding="cp949")
+
+    X_len = len(X_train)
+    X_all = pd.concat([X_train, X_test], axis=0)
+
+    main()
+    print_all()
 pd.set_option("display.max_rows", 10)
 pd.set_option("display.max_columns", 999)
 

@@ -84,13 +84,13 @@ get_eval(sd, 'kn_model', y_val, rst, cvs.mean())
 gn_model, cvs, rst= predict_model(GaussianNB(), X_train, y_train, X_val)
 get_eval(sd, 'gn_model', y_val, rst, cvs.mean())
 
-xgb_model, cvs, rst= predict_model(XGBClassifier(), X_train, y_train, X_val)
-get_eval(sd, 'xgb_model', y_val, rst, cvs.mean())
+#xgb_model, cvs, rst= predict_model(XGBClassifier(), X_train, y_train, X_val)
+#get_eval(sd, 'xgb_model', y_val, rst, cvs.mean())
 
 for k,v in sd.items():
     print("{0}->{1}".format(k, v))
 
-model= xgb_model
+model= lg_model
 print("=================================================")
 
 rst_p= model.predict_proba(X_test)
