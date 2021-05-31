@@ -83,16 +83,22 @@ def make_model(model,X_train, y_train, X_val, y_val, model_nm, model_score):
 
     model_score[model_nm]= dt_score
 
+    return model
+
 
 model_score=dict()
-make_model(SVC(probability=True, random_state=123), X_train, y_train, X_val, y_val, "svc", model_score)
-make_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val, y_val, "dtc", model_score)
-make_model(RandomForestClassifier(random_state=123), X_train, y_train, X_val, y_val, "rfc", model_score)
-make_model(GaussianNB(), X_train, y_train, X_val, y_val, "gnb", model_score)
-make_model(LogisticRegression(random_state=123), X_train, y_train, X_val, y_val, "lgr", model_score)
-make_model(KNeighborsClassifier(), X_train, y_train, X_val, y_val, "knf", model_score)
-make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
-
+model= make_model(SVC(probability=True, random_state=123), X_train, y_train, X_val, y_val, "svc", model_score)
+model= make_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val, y_val, "dtc", model_score)
+model= make_model(RandomForestClassifier(random_state=123), X_train, y_train, X_val, y_val, "rfc", model_score)
+model= make_model(GaussianNB(), X_train, y_train, X_val, y_val, "gnb", model_score)
+model= make_model(LogisticRegression(random_state=123), X_train, y_train, X_val, y_val, "lgr", model_score)
+model= make_model(KNeighborsClassifier(), X_train, y_train, X_val, y_val, "knf", model_score)
+model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
 
 for k, v in model_score.items():
     print("{0} -> {1}".format(k, v))
+
+#하이퍼파라미터 최적화 GridSearchCV
+
+
+#제출
