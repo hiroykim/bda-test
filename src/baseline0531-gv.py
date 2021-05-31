@@ -114,8 +114,9 @@ param_grid={
 
 gscv= GridSearchCV(model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True)
 gscv.fit(X_train, y_train)
-scores = pd.DataFrame(gscv.cv_results_)
-print(scores)
+#scores = pd.DataFrame(gscv.cv_results_)
+#print(scores)
+print(gscv.cv_results_)
 print(gscv.best_params_)
 print(gscv.best_score_)
 model= gscv.best_estimator_
@@ -130,3 +131,4 @@ df_rst= pd.DataFrame(rst[:,1:], columns=['gender'])
 df_rst_all= pd.concat([X_test_all.cust_id, df_rst.gender.map(lambda x: float("{0:.3f}".format(x)))], axis=1)
 print(df_rst_all['gender'].apply(lambda x: "{0:.3f}".format(x)))
 df_rst_all.to_csv("114203701.csv", index=False)
+
