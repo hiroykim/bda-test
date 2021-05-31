@@ -22,6 +22,7 @@ y_train_all= pd.read_csv("data/y_train.csv", encoding='cp949')
 X_test_all= pd.read_csv("data/X_test.csv", encoding='cp949')
 
 print(X_train_all.head(5))
+print(X_test_all.head(5))
 print(X_train_all.info())
 
 #EDA
@@ -87,13 +88,14 @@ def make_model(model,X_train, y_train, X_val, y_val, model_nm, model_score):
 
 
 model_score=dict()
-model= make_model(SVC(probability=True, random_state=123), X_train, y_train, X_val, y_val, "svc", model_score)
-model= make_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val, y_val, "dtc", model_score)
-model= make_model(RandomForestClassifier(random_state=123), X_train, y_train, X_val, y_val, "rfc", model_score)
-model= make_model(GaussianNB(), X_train, y_train, X_val, y_val, "gnb", model_score)
+if 0:
+    model= make_model(SVC(probability=True, random_state=123), X_train, y_train, X_val, y_val, "svc", model_score)
+    model= make_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val, y_val, "dtc", model_score)
+    model= make_model(RandomForestClassifier(random_state=123), X_train, y_train, X_val, y_val, "rfc", model_score)
+    model= make_model(GaussianNB(), X_train, y_train, X_val, y_val, "gnb", model_score)
+    model= make_model(KNeighborsClassifier(), X_train, y_train, X_val, y_val, "knf", model_score)
+    model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
 model= make_model(LogisticRegression(random_state=123), X_train, y_train, X_val, y_val, "lgr", model_score)
-model= make_model(KNeighborsClassifier(), X_train, y_train, X_val, y_val, "knf", model_score)
-#model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
 
 for k, v in model_score.items():
     print("{0} -> {1}".format(k, v))
@@ -102,3 +104,8 @@ for k, v in model_score.items():
 
 
 #제출
+rst= model.predict_proba(X_test)
+df_rst= pd.DataFrame(rst[:,1:], columns=['gender'])
+df_rst_all= pd.concat([X_test_all.cust_id, df_rst.gender.map(lambda x: float("{0:.3f}".format(x)))], axis=1)
+print(df_rst_all['gender'].apply(lambda x: "{0:.2f}".format(x)))
+df_rst_all.to_csv("114203701.csv", index=False)
