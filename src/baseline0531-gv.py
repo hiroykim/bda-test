@@ -114,6 +114,8 @@ param_grid={
 
 gscv= GridSearchCV(model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True)
 gscv.fit(X_train, y_train)
+scores = pd.DataFrame(gscv.cv_results_)
+print(scores)
 print(gscv.best_params_)
 print(gscv.best_score_)
 model= gscv.best_estimator_
