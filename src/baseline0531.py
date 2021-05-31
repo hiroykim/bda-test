@@ -107,5 +107,5 @@ for k, v in model_score.items():
 rst= model.predict_proba(X_test)
 df_rst= pd.DataFrame(rst[:,1:], columns=['gender'])
 df_rst_all= pd.concat([X_test_all.cust_id, df_rst.gender.map(lambda x: float("{0:.3f}".format(x)))], axis=1)
-print(df_rst_all['gender'].apply(lambda x: "{0:.2f}".format(x)))
+print(df_rst_all['gender'].apply(lambda x: "{0:.3f}".format(x)))
 df_rst_all.to_csv("114203701.csv", index=False)
