@@ -96,8 +96,10 @@ models= [
 ]
 
 model_score=dict()
+models_d=dict()
+i=0
 for model in models:
-    last_model= make_model(model, X_train, y_train, X_val, y_val, model_score)
+    models_d[i]= make_model(model, X_train, y_train, X_val, y_val, model_score)
 
 vmodel=VotingClassifier(estimators=[('7', models[7]),('8', models[8]),('9', models[9])] ,weights=[1,1,1] ,voting='soft')
 make_model(vmodel, X_train, y_train, X_val, y_val, model_score)
@@ -106,21 +108,23 @@ for k, v in model_score.items():
     print("{0:>28} -> {1}".format(k, v))
 
 #하이퍼파라미터 최적화 GridSearchCV
+good_model= models_d[9]
+
 param_grid={
     'n_estimators': [50,100,200]
 }
-gscv= GridSearchCV(last_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True, verbose=2)
+gscv= GridSearchCV(good_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True, verbose=2)
 gscv.fit(X_train, y_train)
 #scores = pd.DataFrame(gscv.cv_results_)
 #print(scores)
 print(gscv.cv_results_)
 print(gscv.best_params_)
 print(gscv.best_score_)
-model= gscv.best_estimator_
+good_model= gscv.best_estimator_
 
 
 #제출
-rst= model.predict_proba(X_test)
+rst= good_model.predict_proba(X_test)
 df_rst= pd.DataFrame(rst[:,1:], columns=['gender'])
 df_rst_all= pd.concat([X_test_all.cust_id, df_rst.gender.map(lambda x: float("{0:.3f}".format(x)))], axis=1)
 print(df_rst_all['gender'].apply(lambda x: "{0:.3f}".format(x)))
