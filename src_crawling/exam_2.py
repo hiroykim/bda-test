@@ -13,3 +13,8 @@ response = requests.get('https://section.blog.naver.com/Search/Post.nhn', params
 
 print(response.status_code)
 print(response.url)
+print(response.headers)
+print(type(response.headers))
+for k, v in response.headers.items():
+    print(k, " : ", v)
+help(response)
