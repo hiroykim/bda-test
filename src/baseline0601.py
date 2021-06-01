@@ -13,13 +13,23 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
+import warnings
+import platform
+
+warnings.filterwarnings('ignore')
+warnings.simplefilter('ignore')
 
 pd.set_option("display.max_rows", 10)
 pd.set_option("display.max_columns", 999)
 
-X_train_all= pd.read_csv("data/X_train.csv", encoding='cp949')
-y_train_all= pd.read_csv("data/y_train.csv", encoding='cp949')
-X_test_all= pd.read_csv("data/X_test.csv", encoding='cp949')
+if platform.system() == "Windows":
+    X_train_all= pd.read_csv("data/X_train.csv", encoding='cp949')
+    y_train_all= pd.read_csv("data/y_train.csv", encoding='cp949')
+    X_test_all= pd.read_csv("data/X_test.csv", encoding='cp949')
+else:
+    X_train_all= pd.read_csv("data/X_train.csv")
+    y_train_all= pd.read_csv("data/y_train.csv")
+    X_test_all= pd.read_csv("data/X_test.csv")
 
 #EDA
 X_train_all['gender']= y_train_all['gender']
@@ -83,8 +93,7 @@ if 0:
     model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
     model = make_model(BaggingClassifier(DecisionTreeClassifier(random_state=123)), X_train, y_train, X_val, y_val,"bag", model_score)
 
-model= make_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val, y_val, "dtc", model_score)
-model= make_model(BaggingClassifier(DecisionTreeClassifier(random_state=123)), X_train, y_train, X_val, y_val, "bag", model_score)
+model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
 
 print(model)
 
