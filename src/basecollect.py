@@ -11,3 +11,9 @@ driver= webdriver.Chrome("../install/chromedriver")
 
 driver.get(url)
 
+html = driver.page_source
+soup = BeautifulSoup(html)
+
+v= soup.select('.yuRUbf')
+
+print(v)
