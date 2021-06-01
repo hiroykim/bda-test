@@ -15,6 +15,9 @@ from xgboost import XGBClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 import sklearn.svm
+import sklearn.ensemble
+from sklearn.ensemble import BaggingClassifier
 import traceback
 
-help(traceback)
+print(BaggingClassifier().get_params())
+#help(BaggingClassifier)

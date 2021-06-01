@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split, KFold, cross_val_score, Gr
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_auc_score, accuracy_score
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, VotingClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -46,7 +46,7 @@ X_all['환불금액']= X_all.환불금액.fillna(0)
 df_pd= pd.get_dummies(X_all['주구매상품'])
 df_ag= pd.get_dummies(X_all['주구매지점'])
 X_all= pd.concat([X_all, df_pd, df_ag], axis=1)
-X_all= X_all.drop(['cust_id', 'gender', '주구매상품', '주구매지점'] , axis=1)
+X_all= X_all.drop(['cust_id', 'gender', '주구매상품', '주구매지점', '환불금액'] , axis=1)
 
 #Scaling 처리
 sc= StandardScaler()
@@ -64,7 +64,7 @@ except Exception:
 
     #model, predict
 
-def make_model(model,X_train, y_train, X_val, y_val, model_nm, model_score):
+def make_model(model,X_train, y_train, X_val, y_val, model_score):
 
     dt_score = dict()
     model.fit(X_train, y_train)
@@ -77,41 +77,39 @@ def make_model(model,X_train, y_train, X_val, y_val, model_nm, model_score):
     dt_score['f1']= "{0:.4f}".format(f1_score(y_val, rst))
     dt_score['ras']= "{0:.4f}".format(roc_auc_score(y_val, rst))
 
+    model_nm= str(type(model)).split('.')[-1][:-2]
     model_score[model_nm]= dt_score
 
     return model
 
+models= [
+    SVC(probability=True, random_state=123)
+    ,DecisionTreeClassifier(random_state=123)
+    ,RandomForestClassifier(random_state=123)
+    ,GaussianNB()
+    ,KNeighborsClassifier()
+    ,LogisticRegression(random_state=123)
+    ,XGBClassifier(random_state=123)
+    ,AdaBoostClassifier(n_estimators=100, random_state=123)
+    ,GradientBoostingClassifier(n_estimators=100, random_state=123)
+    ,BaggingClassifier(GradientBoostingClassifier(n_estimators=100, random_state=123))
+]
 
 model_score=dict()
-if 0:
-    model= make_model(SVC(probability=True, random_state=123), X_train, y_train, X_val, y_val, "svc", model_score)
-    model= make_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val, y_val, "dtc", model_score)
-    model= make_model(RandomForestClassifier(random_state=123), X_train, y_train, X_val, y_val, "rfc", model_score)
-    model= make_model(GaussianNB(), X_train, y_train, X_val, y_val, "gnb", model_score)
-    model= make_model(KNeighborsClassifier(), X_train, y_train, X_val, y_val, "knf", model_score)
-    make_model(LogisticRegression(random_state=123), X_train, y_train, X_val, y_val, "lgr", model_score)
-    model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
-    model = make_model(BaggingClassifier(DecisionTreeClassifier(random_state=123)), X_train, y_train, X_val, y_val,"bag", model_score)
+for model in models:
+    last_model= make_model(model, X_train, y_train, X_val, y_val, model_score)
 
-model= make_model(XGBClassifier(random_state=123), X_train, y_train, X_val, y_val, "xgb", model_score)
-
-print(model)
+vmodel=VotingClassifier(estimators=[('7', models[7]),('8', models[8]),('9', models[9])] ,weights=[1,1,1] ,voting='soft')
+make_model(vmodel, X_train, y_train, X_val, y_val, model_score)
 
 for k, v in model_score.items():
-    print("{0} -> {1}".format(k, v))
+    print("{0:>28} -> {1}".format(k, v))
 
 #하이퍼파라미터 최적화 GridSearchCV
-'''
 param_grid={
-    'booster':['gbtree']
-    ,'max_depth':[5,6,8]
-    ,'min_child_weight': [1,3,5]
-    , 'gamma': [0,1,2,3]
-    , 'nthread': [4]
+    'n_estimators': [50,100,200]
 }
-#{'booster': 'gbtree', 'gamma': 3, 'max_depth': 5, 'min_child_weight': 5, 'nthread': 4}
-
-gscv= GridSearchCV(model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True)
+gscv= GridSearchCV(last_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True, verbose=2)
 gscv.fit(X_train, y_train)
 #scores = pd.DataFrame(gscv.cv_results_)
 #print(scores)
@@ -119,11 +117,7 @@ print(gscv.cv_results_)
 print(gscv.best_params_)
 print(gscv.best_score_)
 model= gscv.best_estimator_
-new_score=dict()
-model= make_model(model, X_train, y_train, X_val, y_val, "xgb", new_score)
-for k, v in new_score.items():
-    print("{0} -> {1}".format(k, v))
-'''
+
 
 #제출
 rst= model.predict_proba(X_test)
@@ -131,4 +125,3 @@ df_rst= pd.DataFrame(rst[:,1:], columns=['gender'])
 df_rst_all= pd.concat([X_test_all.cust_id, df_rst.gender.map(lambda x: float("{0:.3f}".format(x)))], axis=1)
 print(df_rst_all['gender'].apply(lambda x: "{0:.3f}".format(x)))
 df_rst_all.to_csv("114203701.csv", index=False)
-
