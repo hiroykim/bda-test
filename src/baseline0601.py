@@ -91,7 +91,7 @@ models= [
     ,LogisticRegression(random_state=123)
     ,XGBClassifier(random_state=123)
     ,AdaBoostClassifier(n_estimators=100, random_state=123)
-    ,GradientBoostingClassifier(n_estimators=100, random_state=123)
+    ,GradientBoostingClassifier(n_estimators=90, max_depth=2, random_state=123)
     ,BaggingClassifier(GradientBoostingClassifier(n_estimators=100, random_state=123))
 ]
 
@@ -103,22 +103,30 @@ for model in models:
     i += 1
 
 vmodel=VotingClassifier(estimators=[('7', models[7]),('8', models[8]),('9', models[9])] ,weights=[1,1,1] ,voting='soft')
-make_model(vmodel, X_train, y_train, X_val, y_val, model_score)
+vmodel_c= make_model(vmodel, X_train, y_train, X_val, y_val, model_score)
+print("vmodel_c ->", vmodel_c)
 
 for k, v in model_score.items():
     print("{0:>28} -> {1}".format(k, v))
 
 #하이퍼파라미터 최적화 GridSearchCV
-good_model= models_d[8]
+#good_model= models_d[8]
+good_model= vmodel_c
 #print(good_model.get_params())
 #print(models_d[8].get_params())
 #sys.exit(0)
 
+'''
 param_grid={
     'n_estimators': [70, 80, 90]
     , 'learning_rate': [0.05, 0.1, 1.5]
     , 'max_depth': [1, 2]
 }
+'''
+param_grid={
+    'weights': [[1,1,1], [1,2,1], [1,2,2]]
+}
+
 gscv= GridSearchCV(good_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True, verbose=2)
 gscv.fit(X_train, y_train)
 scores = pd.DataFrame(gscv.cv_results_)
