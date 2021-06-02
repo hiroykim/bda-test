@@ -100,6 +100,7 @@ models_d=dict()
 i=0
 for model in models:
     models_d[i]= make_model(model, X_train, y_train, X_val, y_val, model_score)
+    i += 1
 
 vmodel=VotingClassifier(estimators=[('7', models[7]),('8', models[8]),('9', models[9])] ,weights=[1,1,1] ,voting='soft')
 make_model(vmodel, X_train, y_train, X_val, y_val, model_score)
@@ -108,17 +109,23 @@ for k, v in model_score.items():
     print("{0:>28} -> {1}".format(k, v))
 
 #하이퍼파라미터 최적화 GridSearchCV
-good_model= models_d[9]
+good_model= models_d[8]
+#print(good_model.get_params())
+#print(models_d[8].get_params())
+#sys.exit(0)
 
 param_grid={
-    'n_estimators': [50,100,200]
+    'n_estimators': [70, 80, 90]
+    , 'learning_rate': [0.05, 0.1, 1.5]
+    , 'max_depth': [1, 2]
 }
 gscv= GridSearchCV(good_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True, verbose=2)
 gscv.fit(X_train, y_train)
-#scores = pd.DataFrame(gscv.cv_results_)
-#print(scores)
-print(gscv.cv_results_)
+scores = pd.DataFrame(gscv.cv_results_)
+print(scores)
+#print(gscv.cv_results_)
 print(gscv.best_params_)
+print(gscv.get_params())
 print(gscv.best_score_)
 good_model= gscv.best_estimator_
 

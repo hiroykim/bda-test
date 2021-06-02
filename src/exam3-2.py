@@ -75,6 +75,14 @@ def preprocessing_all(X_all):
     X_all= pd.concat([X_all, df_dum_pd, df_dum_loc], axis=1)
     X_all= X_all.drop(['cust_id','주구매상품','주구매지점'], axis=1)
 
+    idxs = X_all[X_all['총구매액'] < 0]['총구매액'].index
+    for idx in idxs:
+        X_all.loc[idx, '총구매액'] = 0
+
+    idxs = X_all[X_all['최대구매액'] < 0]['최대구매액'].index
+    for idx in idxs:
+        X_all.loc[idx, '최대구매액'] = 0
+
     sc= MinMaxScaler()
     X_all= sc.fit_transform(X_all)
 
