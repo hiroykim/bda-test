@@ -3,22 +3,23 @@ import traceback
 import pandas as pd
 import numpy as np
 import multiprocessing
-import platform
-
-import sklearn
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split, KFold, cross_val_score, GridSearchCV
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
-
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_auc_score, accuracy_score
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, VotingClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
+import warnings
+import platform
 
-pd.set_option("display.max_rows", 99)
+warnings.filterwarnings('ignore')
+warnings.simplefilter('ignore')
+
+pd.set_option("display.max_rows", 10)
 pd.set_option("display.max_columns", 999)
 
 if platform.system() == "Windows":
@@ -70,7 +71,7 @@ if 1:
     X_all = pd.concat([X_all, pd_tmp, ag_tmp], axis=1)
     X_all = X_all.drop(['주구매상품', '주구매지점'], axis=1)
 else:
-    X_all['주구매상품'] = LabelEncoder().fit_transform(X_all['주구매상품'])
+    X_all['주구매상품']= LabelEncoder().fit_transform(X_all['주구매상품'])
     X_all['주구매지점'] = LabelEncoder().fit_transform(X_all['주구매지점'])
 
 if 0:
@@ -92,65 +93,86 @@ X_train_all= X_all.iloc[:X_train_all_size,:]
 X_test= X_all.iloc[X_train_all_size:,:]
 
 v_rand=123
-
 X_train, X_val, y_train, y_val = train_test_split(X_train_all, y_train_label, test_size=0.2, random_state=v_rand)
 print(y_train_label)
 #make_predict_eval func
 
-d_scores = dict()
+    #model, predict
+
+def make_model(model,X_train, y_train, X_val, y_val, model_score):
+
+    dt_score = dict()
+    model.fit(X_train, y_train)
+    cvs= cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy', n_jobs=multiprocessing.cpu_count())
+
+    rst= model.predict(X_val)
+    dt_score['acuracy']= np.round(cvs.mean(),4)
+    dt_score['precision']= np.round(precision_score(y_val, rst),4)
+    dt_score['recall']= np.round(recall_score(y_val, rst),4)
+    dt_score['f1']= np.round(f1_score(y_val, rst),4)
+    dt_score['ras']= np.round(roc_auc_score(y_val, rst),4)
+
+    model_nm= str(type(model)).split('.')[-1][:-2]
+    model_score[model_nm]= dt_score
+
+    return model
+
+v_rand=123
 d_models = {
-    "svc": SVC(probability=True,  random_state=v_rand)
+    "svc": SVC(probability=True, random_state=v_rand)
     , "lg": LogisticRegression( random_state=v_rand)
     , "ab": AdaBoostClassifier(n_estimators=100, random_state=v_rand)
     , "rf": RandomForestClassifier( random_state=v_rand)
     , "kn": KNeighborsClassifier()
-    , "gb": GradientBoostingClassifier(n_estimators=100, max_depth=2, random_state=v_rand)
+    , "gb": GradientBoostingClassifier(n_estimators=90, max_depth=2, random_state=v_rand)
     , "bc": BaggingClassifier(n_estimators=100, random_state=v_rand)
     , "nb": GaussianNB()
     , "tc": DecisionTreeClassifier( random_state=v_rand)
-    }
+            }
 
-def model_predict(model, X_train, y_train, X_val, y_val, d_scores, mkey):
-    model.fit(X_train, y_train)
-    cvs= cross_val_score(model, X_train, y_train, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy')
-    predicts= model.predict(X_val)
-    d_score=dict()
-    d_score['accuracy']= np.round(cvs.mean(), 3)
-    d_score['precision']= np.round(precision_score(y_val, predicts), 3)
-    d_score['recall']= np.round(recall_score(y_val, predicts), 3)
-    d_score['f1']= np.round(f1_score(y_val, predicts), 3)
-    d_score['ras']= np.round(roc_auc_score(y_val, predicts), 3)
-    d_scores[mkey]=d_score
+model_score=dict()
+models_d=dict()
+i=0
+for kmv, model in d_models.items():
+    models_d[i]= make_model(model, X_train, y_train, X_val, y_val, model_score)
+    i += 1
 
-    return model
+for k, v in model_score.items():
+    print("{0:>28} -> {1}".format(k, v))
 
-# ensemble -> bagging, boosting, voting
-if 0:
-    for mkey, model in d_models.items():
-        model_predict(model, X_train, y_train, X_val, y_val, d_scores, mkey)
+sys.exit(0)
+#하이퍼파라미터 최적화 GridSearchCV
+#good_model= models_d[8]
+good_model= vmodel_c
+#print(good_model.get_params())
+#print(models_d[8].get_params())
+#sys.exit(0)
 
-v_model= VotingClassifier(estimators=[('gb',d_models['gb']), ('ab',d_models['ab'])], weights=[1,1], voting='soft')
-v_model= model_predict(v_model, X_train, y_train, X_val, y_val, d_scores, 'vt')
-
-for k, v in d_scores.items():
-    print(k, v)
-
+'''
 param_grid={
-    'weights':[[1,1], [2,1], [1,2]]
+    'n_estimators': [70, 80, 90]
+    , 'learning_rate': [0.05, 0.1, 1.5]
+    , 'max_depth': [1, 2]
+}
+'''
+param_grid={
+    'weights': [[1,1,1], [1,2,1], [1,2,2]]
 }
 
-# optimize hyper_params
-gscv= GridSearchCV(v_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), verbose=1, refit=True, scoring='accuracy')
+gscv= GridSearchCV(good_model, param_grid=param_grid, cv=5, n_jobs=multiprocessing.cpu_count(), scoring='accuracy', refit=True, verbose=2)
 gscv.fit(X_train, y_train)
-scores= pd.DataFrame(gscv.cv_results_)
+scores = pd.DataFrame(gscv.cv_results_)
 print(scores)
+#print(gscv.cv_results_)
 print(gscv.best_params_)
+print(gscv.get_params())
 print(gscv.best_score_)
 good_model= gscv.best_estimator_
-print(good_model)
 
-#submit predicts
-predicts= pd.DataFrame(good_model.predict_proba(X_test)[:, 1:], columns=['gender'])
-df_pred = pd.concat([X_test_all['cust_id'], predicts.apply(lambda x: np.round(x,3))], axis=1)
-print(df_pred)
-df_pred.to_csv("20210619.csv", index=False)
+
+#제출
+rst= good_model.predict_proba(X_test)
+df_rst= pd.DataFrame(rst[:,1:], columns=['gender'])
+df_rst_all= pd.concat([X_test_all.cust_id, df_rst.gender.map(lambda x: float("{0:.3f}".format(x)))], axis=1)
+print(df_rst_all['gender'].apply(lambda x: "{0:.3f}".format(x)))
+df_rst_all.to_csv("114203701.csv", index=False)
