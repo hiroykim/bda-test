@@ -24,11 +24,11 @@ pd.set_option("display.max_columns", 999)
 if platform.system() == "Windows":
     X_train_all = pd.read_csv("data/X_train.csv", encoding='cp949')
     y_train_all = pd.read_csv("data/y_train.csv", encoding='cp949')
-    X_test_all = pd.read_csv("data/x_test.csv", encoding='cp949')
+    X_test_all = pd.read_csv("data/X_test.csv", encoding='cp949')
 else:
     X_train_all = pd.read_csv("data/X_train.csv")
     y_train_all = pd.read_csv("data/y_train.csv")
-    X_test_all = pd.read_csv("data/x_test.csv")
+    X_test_all = pd.read_csv("data/X_test.csv")
 
 #INFO
 if 0:
@@ -125,7 +125,7 @@ def model_predict(model, X_train, y_train, X_val, y_val, d_scores, mkey):
     return model
 
 # ensemble -> bagging, boosting, voting
-if 0:
+if 1:
     for mkey, model in d_models.items():
         model_predict(model, X_train, y_train, X_val, y_val, d_scores, mkey)
 
