@@ -9,7 +9,7 @@ print(time.localtime(time.time()))
 
 #https://dojang.io/mod/page/view.php?id=2463
 date = time.strftime('%Y%m%d%H%M%S', time.localtime())
-print(date)
+print("YYYYMMDDhh24mmss :", date)
 
 print(datetime.datetime(2020,2,2))
 print(datetime.datetime.today())
