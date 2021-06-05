@@ -20,7 +20,10 @@ X_train= pd.read_csv("data/X_train.csv", encoding='cp949')
 y_train= pd.read_csv("data/y_train.csv", encoding='cp949')
 X_test= pd.read_csv("data/X_test.csv", encoding='cp949')
 
+
 X_train['gender']= y_train['gender']
+print(y_train.info())
+print(X_train.info())
 X_test_size= len(X_test)
 X_all= pd.concat([X_train, X_test], axis=0)
 
@@ -35,6 +38,7 @@ if 0:
     X_all= X_all.drop(['환불금액','cust_id'],axis=1)
 else:
     X_all['환불금액'] = X_all['환불금액'].fillna(0)
+    X_all= X_all.drop(['cust_id'],axis=1)
 
 if 0:
     X_all = X_all[X_all['총구매액'] > 0]
@@ -55,8 +59,7 @@ else:
 if 1:
     columns= list(X_all.columns)
     columns.remove("gender")
-    X_all[columns]= pd.DataFrame(StandardScaler().fit_transform(X_all[columns]), columns=columns)
-    #X_all['gender']= X_all['gender'].astype(int)
+    X_all[columns]= pd.DataFrame(MinMaxScaler().fit_transform(X_all[columns]), columns=columns)
 
 if 1:
     print(X_all.info())
@@ -70,8 +73,9 @@ print("Size : ", len(X_all),len(X_test) ,X_train_size)
 X_train= X_all.iloc[:X_train_size, :-1]
 X_test= X_all.iloc[X_train_size:, :-1]
 y_train=X_all.iloc[:X_train_size, -1]
+y_train= y_train.astype('int64')
 
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=11)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=123)
 print("=================================================")
 
 sd=dict()
@@ -94,16 +98,16 @@ def get_eval(sd, k_name, label, pred, cvs_mean):
     sd[k_name]= new_dict
 
 
-#svc_model, cvs, rst= predict_model(SVC(probability=True), X_train, y_train, X_val)
-#get_eval(sd, 'svc_model', y_val, rst, cvs.mean())
+svc_model, cvs, rst= predict_model(SVC(probability=True, random_state=123), X_train, y_train, X_val)
+get_eval(sd, 'svc_model', y_val, rst, cvs.mean())
 
-#lg_model, cvs, rst= predict_model(LogisticRegression(), X_train, y_train, X_val)
-#get_eval(sd, 'lg_model', y_val, rst, cvs.mean())
+lg_model, cvs, rst= predict_model(LogisticRegression(random_state=123), X_train, y_train, X_val)
+get_eval(sd, 'lg_model', y_val, rst, cvs.mean())
 
-dt_model, cvs, rst= predict_model(DecisionTreeClassifier(), X_train, y_train, X_val)
+dt_model, cvs, rst= predict_model(DecisionTreeClassifier(random_state=123), X_train, y_train, X_val)
 get_eval(sd, 'dt_model', y_val, rst, cvs.mean())
 
-rf_model, cvs, rst= predict_model(RandomForestClassifier(), X_train, y_train, X_val)
+rf_model, cvs, rst= predict_model(RandomForestClassifier(random_state=123), X_train, y_train, X_val)
 get_eval(sd, 'rf_model', y_val, rst, cvs.mean())
 
 kn_model, cvs, rst= predict_model(KNeighborsClassifier(), X_train, y_train, X_val)
@@ -112,14 +116,31 @@ get_eval(sd, 'kn_model', y_val, rst, cvs.mean())
 gn_model, cvs, rst= predict_model(GaussianNB(), X_train, y_train, X_val)
 get_eval(sd, 'gn_model', y_val, rst, cvs.mean())
 
-
-gb_model, cvs, rst= predict_model(GradientBoostingClassifier(n_estimators=100), X_train, y_train, X_val)
+gb_model, cvs, rst= predict_model(GradientBoostingClassifier(n_estimators=100, random_state=123), X_train, y_train, X_val)
 get_eval(sd, 'gb_model', y_val, rst, cvs.mean())
+
+
+#GridSearchCV
+param_grid={
+    "n_estimators": [40, 50, 60]
+    , "max_depth":[3, 4, 5]
+    , "max_features": ['auto', None]
+}
+
+gscv = GridSearchCV(gb_model, param_grid=param_grid, cv=5, n_jobs=-1, scoring="roc_auc", refit=True)
+gscv.fit(X_train, y_train)
+result= pd.DataFrame(gscv.cv_results_)
+print(result)
+print(gscv.best_score_)
+print(gscv.best_params_)
+good_model = gscv.best_estimator_
+good_model, cvs, rst= predict_model(good_model, X_train, y_train, X_val)
+get_eval(sd, 'good_model', y_val, rst, cvs.mean())
 
 for k,v in sd.items():
     print("{0}->{1}".format(k, v))
 
-model= gb_model
+model= good_model
 print("=================================================")
 
 rst_p= model.predict_proba(X_test)
