@@ -143,10 +143,10 @@ for k,v in sd.items():
 model= good_model
 print("=================================================")
 
-rst_p= model.predict_proba(X_test)
-y_test= pd.DataFrame(rst_p, columns=['del','gender'])
-y_test= y_test['gender']
-y_test= pd.concat([y_cust, y_test], axis=1)
+rst_p= model.predict_proba(X_test)[:,-1]
+y_test= pd.DataFrame(rst_p, columns=['gender'])
+y_test['cust_id']= y_cust
+y_test= y_test[['cust_id','gender']]
 y_test['gender']= y_test['gender'].map(lambda x: '%0.3f'%x)
 print(y_test)
 
