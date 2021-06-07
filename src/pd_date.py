@@ -1,4 +1,5 @@
 import pandas as pd
+import pandas.core.missing
 
 data={
     'col1': [1,2,3,4,5]
@@ -17,3 +18,5 @@ pd_1['mm'] = pd_1.date.dt.month
 pd_1['dd'] = pd_1.date.dt.day
 print(pd_1.info())
 print(pd_1)
+
+help(pd.DataFrame)
