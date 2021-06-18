@@ -115,6 +115,7 @@ model = make_model_r(AdaBoostRegressor(), X_train, y_train, X_val, y_val, dt_sco
 for k, v in dt_scores.items():
     print(k, v)
 
+# hyper-params optimization
 print(model.get_params().keys())
 print(sklearn.metrics.SCORERS.keys())
 param_grid={
