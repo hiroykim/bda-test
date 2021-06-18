@@ -13,7 +13,7 @@ from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
 from sklearn.svm import SVR, SVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, AdaBoostRegressor, AdaBoostClassifier,\
-    GradientBoostingRegressor, GradientBoostingClassifier
+    GradientBoostingRegressor, GradientBoostingClassifier, VotingClassifier, VotingRegressor, StackingRegressor, StackingClassifier
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA, KernelPCA, SparsePCA
 
@@ -110,7 +110,8 @@ model = make_model_r(SVR(), X_train, y_train, X_val, y_val, dt_scores, 'svr')
 model = make_model_r(RandomForestRegressor(), X_train, y_train, X_val, y_val, dt_scores, 'rfr')
 model = make_model_r(GaussianNB(), X_train, y_train, X_val, y_val, dt_scores, 'gnb')
 model = make_model_r(DecisionTreeRegressor(), X_train, y_train, X_val, y_val, dt_scores, 'dtr')
-model = make_model_r(GradientBoostingClassifier(), X_train, y_train, X_val, y_val, dt_scores, 'gbr')
+model = make_model_r(GradientBoostingRegressor(), X_train, y_train, X_val, y_val, dt_scores, 'gbr')
+model = make_model_r(StackingRegressor(estimators=[("1", LinearRegression()), ("2", SVR())], final_estimator=AdaBoostRegressor()), X_train, y_train, X_val, y_val, dt_scores, 'str')
 model = make_model_r(AdaBoostRegressor(), X_train, y_train, X_val, y_val, dt_scores, 'abr')
 for k, v in dt_scores.items():
     print(k, v)
