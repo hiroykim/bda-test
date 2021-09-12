@@ -1,5 +1,8 @@
-﻿import base64
+﻿# 실행 환경
+# windows10, python3.6.8, pycharm(2020.03.05)
+import base64
 import hashlib
+#pip install pycryptodomex 또는 pycryptodome
 from Cryptodome.Cipher import AES
 from Cryptodome.Random import get_random_bytes
 
