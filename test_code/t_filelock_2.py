@@ -2,7 +2,7 @@ from time import sleep
 from filelock import Timeout, FileLock
 import os
 
-lock = FileLock("high_ground.txt.lock", timeout=2)
+lock = FileLock("high_ground.txt.lock", timeout=10)
 print("pgm_2--------1----------{}".format(os.getpid()) )
 print("lock.is_locked : ", lock.is_locked)
 

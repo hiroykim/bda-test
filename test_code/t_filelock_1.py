@@ -9,10 +9,10 @@ sleep(1)
 print("lock.is_locked : ", lock.is_locked)
 with lock:
     print("lock.is_locked : ", lock.is_locked)
-    sleep(2)
     print("pgm_1--------2----------{}".format(os.getpid()) )
     open("high_ground.txt", "a").write("You were the chosen pgm_1." + str(os.getpid()) + "\n")
     print("lock.is_locked_1 : ", lock.is_locked)
+    sleep(10)
     print("lock.acquire() : ", lock.acquire())
     print("lock.is_locked_2 : ", lock.is_locked)
 
