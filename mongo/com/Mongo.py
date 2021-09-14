@@ -15,11 +15,17 @@ class Mongo():
     def set_db(self, dbname):
         self.db = self.conn.get_database(dbname)
 
-    def db_select_all(self, col):
+    def select_all(self, col):
         return col.find({})
 
-    def db_insert(self, col, data):
-        return col.insert_many(data)
+    def insert_many(self, col, i_data):
+        return col.insert_many(i_data)
+
+    def update(self, col, o_data, n_data):
+        return col.update(o_data, {"$set": n_data})
+
+    def delete_many(self, col, d_data):
+        return col.delete_many(d_data)
 
 if __name__ == "__main__":
     print("--Run--")
@@ -30,13 +36,37 @@ if __name__ == "__main__":
 
     print("-insert-")
     i_data = [{"item_11":"value_11"},{"item_22":"value_22"}]
-    results = server.db_insert(server.db.testdb, i_data)
+    results = server.insert_many(server.db.testdb, i_data)
     print(type(results))
     for r in results.inserted_ids:
         print(r)
 
     print("-select-")
-    results = server.db_select_all(server.db.testdb)
+    results = server.select_all(server.db.testdb)
+    print(type(results))
+    for r in results:
+        print(r)
+
+    print("-update-")
+    o_data = {"x": 1}
+    n_data = {"x": 111}
+    results = server.update(server.db.testdb, o_data, n_data)
+    print(type(results))
+    print(results)
+
+    print("-select-")
+    results = server.select_all(server.db.testdb)
+    print(type(results))
+    for r in results:
+        print(r)
+
+    print("-delete-")
+    d_data = {"item_22": "value_22"}
+    results = server.delete_many(server.db.testdb, d_data)
+    print(type(results))
+
+    print("-select-")
+    results = server.select_all(server.db.testdb)
     print(type(results))
     for r in results:
         print(r)
