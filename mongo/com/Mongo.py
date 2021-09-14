@@ -12,32 +12,31 @@ class Mongo():
     def connect(self):
         self.conn = MongoClient(self.conf.host, int(self.conf.port))
 
-    def getdb(self):
-        return self.conn.get_database("testdb")
+    def set_db(self, dbname):
+        self.db = self.conn.get_database(dbname)
 
     def db_select_all(self, col):
         return col.find({})
 
-    def db_insert(self, data):
-        return db.testdb.insert_many(data)
+    def db_insert(self, col, data):
+        return col.insert_many(data)
 
 if __name__ == "__main__":
     print("--Run--")
     #print("sys.path" + str(sys.path))
     server = Mongo()
     server.connect()
-    db = server.getdb()
-
+    server.set_db("testdb")
 
     print("-insert-")
-    i_data = [{"item_1":"value_1"},{"item_2":"value_2"}]
-    results = server.db_insert(i_data)
+    i_data = [{"item_11":"value_11"},{"item_22":"value_22"}]
+    results = server.db_insert(server.db.testdb, i_data)
     print(type(results))
     for r in results.inserted_ids:
         print(r)
 
     print("-select-")
-    results = server.db_select_all(db.testdb)
+    results = server.db_select_all(server.db.testdb)
     print(type(results))
     for r in results:
         print(r)
