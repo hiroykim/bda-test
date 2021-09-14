@@ -16,7 +16,7 @@ class Mongo():
         self.db = self.conn.get_database(dbname)
 
     def select_all(self, col):
-        return col.find({})
+        return col.find({},{"_id":0})
 
     def insert_many(self, col, i_data):
         return col.insert_many(i_data)
